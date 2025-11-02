@@ -1,49 +1,19 @@
-// src/routes/stock.js -> provides /api/stock/current and /api/stock/:code
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const { RelayInventory } = require('../models');
-const { Sequelize } = require('sequelize');
 
-// GET /api/stock/current -> list balances for all SKUs
-router.get('/current', async (req, res) => {
+// Mock stock data - later replace with DB integration
+router.get("/current", async (req, res) => {
   try {
-    const totals = await RelayInventory.findAll({
-      attributes: [
-        'product_code',
-        [Sequelize.fn('SUM', Sequelize.literal("CASE WHEN movement_type='IN' THEN quantity ELSE -quantity END")), 'balance'],
-        [Sequelize.fn('SUM', Sequelize.literal("CASE WHEN movement_type='IN' THEN quantity ELSE 0 END")), 'total_in'],
-        [Sequelize.fn('SUM', Sequelize.literal("CASE WHEN movement_type='OUT' THEN quantity ELSE 0 END")), 'total_out']
-      ],
-      group: ['product_code'],
-      order: [['product_code','ASC']],
-      raw: true
-    });
-    res.json(totals);
-  } catch (err) {
-    console.error('GET /api/stock/current', err);
-    res.status(500).json({ error: 'Server error' });
-  }
-});
+    const stock = [
+      { product_code: "SKU001", product_name: "Relay Pad 10", qty: 150 },
+      { product_code: "SKU002", product_name: "Relay Phone 9", qty: 85 },
+      { product_code: "SKU003", product_name: "Relay Charger", qty: 300 },
+    ];
 
-// GET /api/stock/:code -> balance for single SKU
-router.get('/:code', async (req, res) => {
-  try {
-    const code = req.params.code;
-    const totals = await RelayInventory.findAll({
-      where: { product_code: code },
-      attributes: [
-        'product_code',
-        [Sequelize.fn('SUM', Sequelize.literal("CASE WHEN movement_type='IN' THEN quantity ELSE -quantity END")), 'balance'],
-        [Sequelize.fn('SUM', Sequelize.literal("CASE WHEN movement_type='IN' THEN quantity ELSE 0 END")), 'total_in'],
-        [Sequelize.fn('SUM', Sequelize.literal("CASE WHEN movement_type='OUT' THEN quantity ELSE 0 END")), 'total_out']
-      ],
-      group: ['product_code'],
-      raw: true
-    });
-    res.json(totals[0] || { product_code: code, balance: 0, total_in: 0, total_out: 0 });
-  } catch (err) {
-    console.error('GET /api/stock/:code', err);
-    res.status(500).json({ error: 'Server error' });
+    res.json({ message: "✅ Current stock fetched successfully", data: stock });
+  } catch (error) {
+    console.error("Stock fetch failed:", error.message);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 

@@ -7,6 +7,10 @@ app.get('/', (req, res) => {
   res.send('✅ Relay WMS Backend is running successfully!');
 });
 
+app.use("/api/products", require("./routes/products"));
+app.use("/api/stock", require("./routes/stock"));
+app.use("/api/inventory", require("./routes/inventory"));
+
 const userRoutes = require('./routes/userRoutes');
 app.use('/api/users', userRoutes);
 

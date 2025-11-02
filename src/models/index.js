@@ -1,11 +1,12 @@
-// src/models/index.js - initializes Sequelize and registers models
-const { Sequelize, DataTypes } = require('sequelize');
-require('dotenv').config();
+	const { Sequelize } = require('sequelize');
+
 const databaseUrl = process.env.DATABASE_URL || '';
+
 if (!databaseUrl) {
   console.error('DATABASE_URL is not set. Set it in environment or .env');
 }
-const sequelize = new Sequelize(databaseUrl, {
+
+const sequelize = new Sequelize(process.env.DATABASE_URL, {
   dialect: 'postgres',
   logging: false,
   dialectOptions: {
@@ -16,14 +17,10 @@ const sequelize = new Sequelize(databaseUrl, {
   }
 });
 
-const User = require('./user')(sequelize, DataTypes);
-const Product = require('./product')(sequelize, DataTypes);
-const RelayInventory = require('./relay_inventory')(sequelize, DataTypes);
+
+const User = require('./user')(sequelize);
 
 module.exports = {
   sequelize,
-  Sequelize,
   User,
-  Product,
-  RelayInventory
 };
