@@ -1,19 +1,33 @@
 const express = require("express");
 const router = express.Router();
+const { Sequelize, QueryTypes } = require("sequelize");
+require("dotenv").config();
 
-// Mock stock data - later replace with DB integration
+const sequelize = new Sequelize(process.env.DATABASE_URL, {
+  dialect: "postgres",
+  dialectOptions: {
+    ssl: { require: true, rejectUnauthorized: false }
+  },
+  logging: false
+});
+
+// ✅ GET — Current Stock Summary
 router.get("/current", async (req, res) => {
   try {
-    const stock = [
-      { product_code: "SKU001", product_name: "Relay Pad 10", qty: 150 },
-      { product_code: "SKU002", product_name: "Relay Phone 9", qty: 85 },
-      { product_code: "SKU003", product_name: "Relay Charger", qty: 300 },
-    ];
+    const results = await sequelize.query(`
+      SELECT 
+        product_code,
+        product_name,
+        SUM(CASE WHEN movement_type = 'IN' THEN quantity ELSE -quantity END) AS current_stock
+      FROM relay_inventory
+      GROUP BY product_code, product_name
+      ORDER BY product_code;
+    `, { type: QueryTypes.SELECT });
 
-    res.json({ message: "✅ Current stock fetched successfully", data: stock });
+    res.json(results);
   } catch (error) {
-    console.error("Stock fetch failed:", error.message);
-    res.status(500).json({ error: "Internal server error" });
+    console.error("Error fetching stock summary:", error);
+    res.status(500).json({ error: "Server error" });
   }
 });
 
