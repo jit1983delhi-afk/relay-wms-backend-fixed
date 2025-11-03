@@ -14,6 +14,9 @@ app.use("/api/inventory", require("./routes/inventory"));
 const userRoutes = require('./routes/userRoutes');
 app.use('/api/users', userRoutes);
 
+import stockRoutes from "./routes/stock.js";
+app.use("/api/stock", stockRoutes);
+
 app.listen(PORT, () => {
   console.log('Server running on port', PORT);
 });

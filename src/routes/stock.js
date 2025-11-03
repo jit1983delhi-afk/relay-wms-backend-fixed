@@ -1,34 +1,68 @@
-const express = require("express");
+import express from "express";
+import pool from "../db.js";
+
 const router = express.Router();
-const { Sequelize, QueryTypes } = require("sequelize");
-require("dotenv").config();
 
-const sequelize = new Sequelize(process.env.DATABASE_URL, {
-  dialect: "postgres",
-  dialectOptions: {
-    ssl: { require: true, rejectUnauthorized: false }
-  },
-  logging: false
-});
-
-// ✅ GET — Current Stock Summary
-router.get("/current", async (req, res) => {
+// ✅ 1. Add Stock (IN)
+router.post("/in", async (req, res) => {
   try {
-    const results = await sequelize.query(`
-      SELECT 
-        product_code,
-        product_name,
-        SUM(CASE WHEN movement_type = 'IN' THEN quantity ELSE -quantity END) AS current_stock
-      FROM relay_inventory
-      GROUP BY product_code, product_name
-      ORDER BY product_code;
-    `, { type: QueryTypes.SELECT });
+    const { product_id, quantity, remarks } = req.body;
+    if (!product_id || !quantity) {
+      return res.status(400).json({ error: "product_id and quantity are required" });
+    }
 
-    res.json(results);
+    await pool.query(
+      `INSERT INTO relay_inventory (product_id, movement_type, quantity, remarks)
+       VALUES ($1, 'IN', $2, $3)`,
+      [product_id, quantity, remarks || null]
+    );
+
+    res.json({ message: "Stock added successfully ✅" });
   } catch (error) {
-    console.error("Error fetching stock summary:", error);
-    res.status(500).json({ error: "Server error" });
+    console.error(error);
+    res.status(500).json({ error: "Server error while adding stock" });
   }
 });
 
-module.exports = router;
+// ✅ 2. Remove Stock (OUT)
+router.post("/out", async (req, res) => {
+  try {
+    const { product_id, quantity, remarks } = req.body;
+    if (!product_id || !quantity) {
+      return res.status(400).json({ error: "product_id and quantity are required" });
+    }
+
+    await pool.query(
+      `INSERT INTO relay_inventory (product_id, movement_type, quantity, remarks)
+       VALUES ($1, 'OUT', $2, $3)`,
+      [product_id, quantity, remarks || null]
+    );
+
+    res.json({ message: "Stock deducted successfully ✅" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Server error while removing stock" });
+  }
+});
+
+// ✅ 3. Live Stock Summary
+router.get("/summary", async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT p.id, p.name,
+        COALESCE(SUM(CASE WHEN r.movement_type = 'IN' THEN r.quantity ELSE 0 END), 0)
+        - COALESCE(SUM(CASE WHEN r.movement_type = 'OUT' THEN r.quantity ELSE 0 END), 0) AS current_stock
+      FROM products p
+      LEFT JOIN relay_inventory r ON p.id = r.product_id
+      GROUP BY p.id, p.name
+      ORDER BY p.id
+    `);
+
+    res.json(result.rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error fetching stock summary" });
+  }
+});
+
+export default router;
