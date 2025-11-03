@@ -1,6 +1,7 @@
 import express from "express";
 import pool from "../db.js";
 
+
 const router = express.Router();
 
 // ✅ 1. Add Stock (IN)
