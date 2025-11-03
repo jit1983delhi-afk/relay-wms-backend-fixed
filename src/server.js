@@ -1,25 +1,23 @@
-import dotenv from "dotenv";
 import express from "express";
+import dotenv from "dotenv";
+import cors from "cors";
+import stockRoutes from "./routes/stock.js";
+import productRoutes from "./routes/products.js";
+import inventoryRoutes from "./routes/inventory.js";
+
 dotenv.config();
 
-const app = require('./app');
-const PORT = process.env.PORT || 10000;
+const app = express();
+app.use(cors());
+app.use(express.json());
 
-// Default route
-app.get('/', (req, res) => {
-  res.send('✅ Relay WMS Backend is running successfully!');
-});
-
-app.use("/api/products", require("./routes/products"));
-app.use("/api/stock", require("./routes/stock"));
-app.use("/api/inventory", require("./routes/inventory"));
-
-const userRoutes = require('./routes/userRoutes');
-app.use('/api/users', userRoutes);
-
-import stockRoutes from "./routes/stock.js";
+// Routes
 app.use("/api/stock", stockRoutes);
+app.use("/api/products", productRoutes);
+app.use("/api/inventory", inventoryRoutes);
 
+// Server
+const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
-  console.log('Server running on port', PORT);
+  console.log(`✅ Server running on port ${PORT}`);
 });
