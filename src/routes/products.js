@@ -1,27 +1,22 @@
-const express = require("express");
+import express from "express";
+import pkg from "pg";
+const { Pool } = pkg;
+
 const router = express.Router();
 
-// Mock product lookup API
-// Example: /api/products/lookup?code=SKU123
-router.get("/lookup", async (req, res) => {
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false },
+});
+
+router.get("/", async (req, res) => {
   try {
-    const { code } = req.query;
-    if (!code) return res.status(400).json({ error: "Missing product code" });
-
-    // For demo - replace this with DB query later
-    const mockProduct = {
-      code,
-      name: "Sample Product",
-      category: "General",
-      brand: "Relay",
-      price: 100,
-    };
-
-    res.json({ message: "✅ Product lookup successful", data: mockProduct });
-  } catch (error) {
-    console.error("Product lookup failed:", error.message);
-    res.status(500).json({ error: "Internal server error" });
+    const result = await pool.query("SELECT * FROM products ORDER BY id ASC");
+    res.json(result.rows);
+  } catch (err) {
+    console.error("❌ Error fetching products:", err.message);
+    res.status(500).json({ error: "Failed to fetch products" });
   }
 });
 
-module.exports = router;
+export default router;

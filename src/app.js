@@ -1,24 +1,25 @@
-const express = require('express');
-const bodyParser = require('body-parser');
-const { sequelize } = require('./models');
+import express from "express";
+import cors from "cors";
+import dotenv from "dotenv";
 
-const authRoutes = require('./routes/auth');
+import productRoutes from "./routes/products.js";
+import inventoryRoutes from "./routes/inventory.js";
+import stockRoutes from "./routes/stock.js";
+
+dotenv.config();
 
 const app = express();
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(cors());
+app.use(express.json());
 
-app.use('/api/auth', authRoutes);
+// Mount routes under /api prefix
+app.use("/api/products", productRoutes);
+app.use("/api/inventory", inventoryRoutes);
+app.use("/api/stock", stockRoutes);
 
-app.get('/api/health', (req, res) => res.json({ ok: true }));
+// Default fallback
+app.get("/", (req, res) => {
+  res.send("✅ Relay WMS backend is running!");
+});
 
-(async function initDb(){
-  try {
-    await sequelize.authenticate();
-    console.log('Database connected successfully.');
-  } catch (err) {
-    console.error('DB connection error:', err.message || err);
-  }
-})();
-
-module.exports = app;
+export default app;
