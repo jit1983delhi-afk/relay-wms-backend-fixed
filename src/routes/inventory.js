@@ -1,7 +1,10 @@
-const express = require("express");
+import express from "express";
+import { Sequelize, DataTypes } from "sequelize";
+import dotenv from "dotenv";
+
+dotenv.config();
+
 const router = express.Router();
-const { Sequelize, DataTypes } = require("sequelize");
-require("dotenv").config();
 
 const sequelize = new Sequelize(process.env.DATABASE_URL, {
   dialect: "postgres",
@@ -26,7 +29,7 @@ const Product = sequelize.define("products", {
   product_name: { type: DataTypes.STRING, allowNull: false }
 }, { tableName: "products", timestamps: false });
 
-// ✅ POST — Manual or Barcode-Based Stock IN/OUT Entry
+// ✅ POST — Stock IN/OUT Entry
 router.post("/", async (req, res) => {
   try {
     let { product_code, movement_type, quantity, product_name } = req.body;
@@ -35,11 +38,9 @@ router.post("/", async (req, res) => {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
-    // Try to auto-fetch product name if not given
     if (!product_name) {
       const found = await Product.findOne({ where: { product_code } });
-      if (found) product_name = found.product_name;
-      else product_name = "Unknown Item";
+      product_name = found ? found.product_name : "Unknown Item";
     }
 
     const entry = await Inventory.create({
@@ -59,7 +60,7 @@ router.post("/", async (req, res) => {
   }
 });
 
-// ✅ GET — Scan Barcode for Product Info
+// ✅ GET — Barcode Scan Lookup
 router.get("/scan/:barcode", async (req, res) => {
   try {
     const code = req.params.barcode;
@@ -80,4 +81,4 @@ router.get("/scan/:barcode", async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

@@ -1,10 +1,9 @@
 import express from "express";
 import pool from "../db.js";
 
-
 const router = express.Router();
 
-// ✅ 1. Add Stock (IN)
+// ✅ Add Stock (IN)
 router.post("/in", async (req, res) => {
   try {
     const { product_id, quantity, remarks } = req.body;
@@ -25,7 +24,7 @@ router.post("/in", async (req, res) => {
   }
 });
 
-// ✅ 2. Remove Stock (OUT)
+// ✅ Remove Stock (OUT)
 router.post("/out", async (req, res) => {
   try {
     const { product_id, quantity, remarks } = req.body;
@@ -46,7 +45,7 @@ router.post("/out", async (req, res) => {
   }
 });
 
-// ✅ 3. Live Stock Summary
+// ✅ Stock Summary
 router.get("/summary", async (req, res) => {
   try {
     const result = await pool.query(`
