@@ -1,6 +1,7 @@
 {
   "name": "relay-wms-backend-fixed",
   "version": "1.0.0",
+"type": "module",
   "main": "src/server.js",
   "scripts": {
     "type": "module",

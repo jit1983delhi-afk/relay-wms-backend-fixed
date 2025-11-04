@@ -1,82 +1,63 @@
 import express from "express";
-import { Sequelize, DataTypes } from "sequelize";
-import dotenv from "dotenv";
-
-dotenv.config();
+import pool from "../db.js";
 
 const router = express.Router();
 
-const sequelize = new Sequelize(process.env.DATABASE_URL, {
-  dialect: "postgres",
-  dialectOptions: { ssl: { require: true, rejectUnauthorized: false } },
-  logging: false
-});
-
-// ✅ Define models
-const Inventory = sequelize.define("relay_inventory", {
-  id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-  product_code: { type: DataTypes.STRING, allowNull: false },
-  product_name: { type: DataTypes.STRING },
-  movement_type: { type: DataTypes.STRING, allowNull: false },
-  quantity: { type: DataTypes.INTEGER, allowNull: false },
-  created_at: { type: DataTypes.DATE, defaultValue: Sequelize.NOW }
-}, { tableName: "relay_inventory", timestamps: false });
-
-const Product = sequelize.define("products", {
-  id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-  product_code: { type: DataTypes.STRING, allowNull: false },
-  product_name: { type: DataTypes.STRING, allowNull: false }
-}, { tableName: "products", timestamps: false });
-
-// ✅ POST — Stock IN/OUT Entry
+// ✅ POST — Add Inventory Movement (IN / OUT)
 router.post("/", async (req, res) => {
   try {
-    let { product_code, movement_type, quantity, product_name } = req.body;
+    const { product_id, movement_type, quantity, remarks } = req.body;
 
-    if (!product_code || !movement_type || !quantity) {
-      return res.status(400).json({ error: "Missing required fields" });
+    if (!product_id || !movement_type || !quantity) {
+      return res.status(400).json({ error: "product_id, movement_type, and quantity are required" });
     }
 
-    if (!product_name) {
-      const found = await Product.findOne({ where: { product_code } });
-      product_name = found ? found.product_name : "Unknown Item";
-    }
+    await pool.query(
+      `INSERT INTO relay_inventory (product_id, movement_type, quantity, remarks)
+       VALUES ($1, $2, $3, $4)`,
+      [product_id, movement_type.toUpperCase(), quantity, remarks || null]
+    );
 
-    const entry = await Inventory.create({
-      product_code,
-      product_name,
-      movement_type,
-      quantity
-    });
-
-    res.status(201).json({
-      message: "✅ Inventory updated successfully",
-      entry
-    });
+    res.json({ message: "✅ Inventory updated successfully" });
   } catch (error) {
-    console.error("Error in inventory entry:", error);
-    res.status(500).json({ error: "Server error" });
+    console.error("Error adding inventory record:", error);
+    res.status(500).json({ error: "Server error while updating inventory" });
   }
 });
 
-// ✅ GET — Scan Barcode for Product Info
-router.get("/scan/:barcode", async (req, res) => {
+// ✅ GET — Fetch All Inventory Movements
+router.get("/", async (req, res) => {
   try {
-    const code = req.params.barcode;
-    const found = await Product.findOne({ where: { product_code: code } });
+    const result = await pool.query(`
+      SELECT r.id, p.name AS product_name, r.movement_type, r.quantity, r.remarks, r.created_at
+      FROM relay_inventory r
+      LEFT JOIN products p ON p.id = r.product_id
+      ORDER BY r.created_at DESC
+    `);
 
-    if (found) {
-      res.json({
-        success: true,
-        message: "✅ Product found",
-        product: found
-      });
-    } else {
-      res.status(404).json({ success: false, message: "❌ Product not found" });
-    }
+    res.json(result.rows);
   } catch (error) {
-    console.error("Error fetching product:", error);
-    res.status(500).json({ error: "Server error" });
+    console.error("Error fetching inventory data:", error);
+    res.status(500).json({ error: "Server error while fetching inventory" });
+  }
+});
+
+// ✅ GET — Fetch Inventory by Product ID
+router.get("/:product_id", async (req, res) => {
+  try {
+    const { product_id } = req.params;
+    const result = await pool.query(
+      `SELECT id, movement_type, quantity, remarks, created_at
+       FROM relay_inventory
+       WHERE product_id = $1
+       ORDER BY created_at DESC`,
+      [product_id]
+    );
+
+    res.json(result.rows);
+  } catch (error) {
+    console.error("Error fetching product inventory:", error);
+    res.status(500).json({ error: "Server error while fetching product inventory" });
   }
 });
 
