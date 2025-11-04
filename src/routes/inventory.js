@@ -1,4 +1,5 @@
 import express from "express";
+const router = express.Router();
 import { Sequelize, DataTypes } from "sequelize";
 import dotenv from "dotenv";
 
