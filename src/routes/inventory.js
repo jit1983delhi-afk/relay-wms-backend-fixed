@@ -13,7 +13,7 @@ router.post("/", async (req, res) => {
     }
 
     await pool.query(
-      `INSERT INTO relay_inventory (product_id, movement_type, quantity, remarks, created_at)
+      `INSERT INTO relay_inventory (product_id, movement_type, quantity, remarks, createdat)
        VALUES ($1, $2, $3, $4, NOW())`,
       [product_id, movement_type.toUpperCase(), quantity, remarks || null]
     );
@@ -35,10 +35,10 @@ router.get("/", async (req, res) => {
         r.movement_type, 
         r.quantity, 
         r.remarks, 
-        r.created_at
+        r.createdat
       FROM relay_inventory r
       LEFT JOIN products p ON CAST(p.id AS VARCHAR) = CAST(r.product_id AS VARCHAR)
-      ORDER BY r.created_at DESC NULLS LAST
+      ORDER BY r.createdat DESC NULLS LAST
     `);
 
     res.json(result.rows);
@@ -59,10 +59,10 @@ router.get("/:product_id", async (req, res) => {
         r.movement_type, 
         r.quantity, 
         r.remarks, 
-        r.created_at
+        r.createdat
        FROM relay_inventory r
        WHERE CAST(r.product_id AS VARCHAR) = $1
-       ORDER BY r.created_at DESC NULLS LAST`,
+       ORDER BY r.createdat DESC NULLS LAST`,
       [product_id]
     );
 
