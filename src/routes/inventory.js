@@ -1,5 +1,4 @@
 import express from "express";
-const router = express.Router();
 import { Sequelize, DataTypes } from "sequelize";
 import dotenv from "dotenv";
 
@@ -13,7 +12,7 @@ const sequelize = new Sequelize(process.env.DATABASE_URL, {
   logging: false
 });
 
-// Inventory Table
+// ✅ Define models
 const Inventory = sequelize.define("relay_inventory", {
   id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
   product_code: { type: DataTypes.STRING, allowNull: false },
@@ -23,7 +22,6 @@ const Inventory = sequelize.define("relay_inventory", {
   created_at: { type: DataTypes.DATE, defaultValue: Sequelize.NOW }
 }, { tableName: "relay_inventory", timestamps: false });
 
-// Products Table (for barcode lookup)
 const Product = sequelize.define("products", {
   id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
   product_code: { type: DataTypes.STRING, allowNull: false },
@@ -61,7 +59,7 @@ router.post("/", async (req, res) => {
   }
 });
 
-// ✅ GET — Barcode Scan Lookup
+// ✅ GET — Scan Barcode for Product Info
 router.get("/scan/:barcode", async (req, res) => {
   try {
     const code = req.params.barcode;
