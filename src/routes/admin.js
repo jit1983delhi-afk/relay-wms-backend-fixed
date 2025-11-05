@@ -1,9 +1,10 @@
 import express from "express";
-import { verifyToken, requireRole } from "../middleware/authMiddleware.js";
-import { getAllUsers } from "../controllers/adminController.js";
+import { verifyToken, isAdmin } from "../middleware/authMiddleware.js";
+import { getAdminDashboard } from "../controllers/adminController.js";
 
 const router = express.Router();
 
-router.get("/users", verifyToken, requireRole(["admin"]), getAllUsers);
+// ✅ Protected admin-only route
+router.get("/dashboard", verifyToken, isAdmin, getAdminDashboard);
 
 export default router;
