@@ -3,6 +3,6 @@ services:
     name: relay-wms-backend-fixed
     env: node
     plan: free
-    rootDir: src
     buildCommand: "npm install"
     startCommand: "node server.js"
+    rootDir: .
