@@ -1,6 +1,6 @@
 import { Sequelize } from "sequelize";
 import dotenv from "dotenv";
-import User from './User.js';
+import UserModel from "./User.js"; // ✅ Correct import
 
 dotenv.config();
 
@@ -22,6 +22,7 @@ const sequelize = new Sequelize(databaseUrl, {
   },
 });
 
+// ✅ Initialize models
 const User = UserModel(sequelize);
 
 (async () => {

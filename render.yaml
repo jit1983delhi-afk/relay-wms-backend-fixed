@@ -2,8 +2,11 @@ services:
   - type: web
     name: relay-wms-backend
     env: node
+    plan: free
     region: oregon
     buildCommand: npm install
     startCommand: npm start
     root: .
-    plan: free
+    envVars:
+      - key: NODE_ENV
+        value: production
