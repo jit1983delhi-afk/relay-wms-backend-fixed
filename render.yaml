@@ -1,8 +1,9 @@
 services:
   - type: web
-    name: relay-wms-backend-fixed
+    name: relay-wms-backend
     env: node
+    region: oregon
+    buildCommand: npm install
+    startCommand: npm start
+    root: .
     plan: free
-    buildCommand: "npm install"
-    startCommand: "node server.js"
-    rootDir: .
