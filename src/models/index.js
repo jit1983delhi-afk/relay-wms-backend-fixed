@@ -1,10 +1,9 @@
 import { Sequelize } from "sequelize";
 import dotenv from "dotenv";
-import UserModel from "./User.js"; // make sure this file uses ESM exports
+import UserModel from "./User.js"; // 👈 must match exact file name (case-sensitive)
 
 dotenv.config();
 
-// ✅ Load database URL
 const databaseUrl = process.env.DATABASE_URL;
 
 if (!databaseUrl) {
@@ -12,28 +11,30 @@ if (!databaseUrl) {
   process.exit(1);
 }
 
-// ✅ Initialize Sequelize connection
+// ✅ Initialize Sequelize
 const sequelize = new Sequelize(databaseUrl, {
   dialect: "postgres",
   logging: false,
   dialectOptions: {
     ssl: {
       require: true,
-      rejectUnauthorized: false, // required for Render PostgreSQL SSL
+      rejectUnauthorized: false,
     },
   },
 });
 
-// ✅ Initialize Models
+// ✅ Define Models
 const User = UserModel(sequelize);
 
-// ✅ Test DB connection (optional, good for debugging)
-try {
-  await sequelize.authenticate();
-  console.log("✅ Database connected successfully!");
-} catch (err) {
-  console.error("❌ Database connection failed:", err.message);
-}
+// ✅ Test Database Connection
+(async () => {
+  try {
+    await sequelize.authenticate();
+    console.log("✅ Database connected successfully!");
+  } catch (error) {
+    console.error("❌ Database connection failed:", error.message);
+  }
+})();
 
-// ✅ Export models and sequelize instance
+// ✅ Export Models & Connection
 export { sequelize, User };
