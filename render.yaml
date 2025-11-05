@@ -4,6 +4,6 @@ services:
     env: node
     plan: free
     buildCommand: "npm install"
-    startCommand: "node ./src/src/server.js"
+    startCommand: "node src/server.js"
     rootDir: .
     autoDeploy: true

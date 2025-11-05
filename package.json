@@ -4,9 +4,9 @@
   "description": "Relay WMS backend for TWBP",
   "main": "src/server.js",
   "type": "module",
-  "scripts": {
-  "start": "node ./src/src/server.js",
-  "dev": "nodemon ./src/src/server.js"
+ "scripts": {
+  "start": "node src/server.js",
+  "dev": "nodemon src/server.js"
   },
   "engines": {
     "node": ">=18"
