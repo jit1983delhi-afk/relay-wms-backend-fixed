@@ -3,6 +3,7 @@ services:
     name: relay-wms-backend-fixed
     env: node
     plan: free
-    buildCommand: "npm install"
-    startCommand: "npm start"
+    buildCommand: "cd src && npm install --prefix .."
+    startCommand: "node src/server.js"
     rootDir: .
+    autoDeploy: true
