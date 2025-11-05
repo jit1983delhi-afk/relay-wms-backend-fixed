@@ -1,6 +1,6 @@
 import { Sequelize } from "sequelize";
 import dotenv from "dotenv";
-import UserModel from "./User.js"; // 👈 must match exact file name (case-sensitive)
+import UserModel from "./User.js";
 
 dotenv.config();
 
@@ -11,7 +11,6 @@ if (!databaseUrl) {
   process.exit(1);
 }
 
-// ✅ Initialize Sequelize
 const sequelize = new Sequelize(databaseUrl, {
   dialect: "postgres",
   logging: false,
@@ -23,10 +22,8 @@ const sequelize = new Sequelize(databaseUrl, {
   },
 });
 
-// ✅ Define Models
 const User = UserModel(sequelize);
 
-// ✅ Test Database Connection
 (async () => {
   try {
     await sequelize.authenticate();
@@ -36,5 +33,4 @@ const User = UserModel(sequelize);
   }
 })();
 
-// ✅ Export Models & Connection
 export { sequelize, User };
