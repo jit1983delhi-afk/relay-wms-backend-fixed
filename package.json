@@ -4,7 +4,9 @@
   "type": "module",
   "main": "src/server.js",
   "scripts": {
-    "type": "module",
+  "verify": "node verify-project.js",
+  "predeploy": "npm run verify"   
+ "type": "module",
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
     "create-admin": "node src/scripts/create-admin.js"
