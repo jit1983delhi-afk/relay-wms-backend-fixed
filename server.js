@@ -1,6 +1,6 @@
 import dotenv from "dotenv";
 import app from "./src/app.js"; // ✅ OK if app.js inside src
-import { sequelize } from "./src/models/index.js"; // ✅ OK if index.js inside src/models
+import { sequelize } from "./models/index.js"; // ✅ OK if index.js inside src/models
 
 dotenv.config();
 
