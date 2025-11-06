@@ -1,6 +1,6 @@
 import { Sequelize } from "sequelize";
 import dotenv from "dotenv";
-import UserModel from "./User.js"; // ✅ Correct import
+import UserModel from "./User.js"; // ✅ RELATIVE PATH (no /src)
 
 dotenv.config();
 
@@ -25,13 +25,5 @@ const sequelize = new Sequelize(databaseUrl, {
 // ✅ Initialize models
 const User = UserModel(sequelize);
 
-(async () => {
-  try {
-    await sequelize.authenticate();
-    console.log("✅ Database connected successfully!");
-  } catch (error) {
-    console.error("❌ Database connection failed:", error.message);
-  }
-})();
-
+// ✅ Export initialized Sequelize instance and models
 export { sequelize, User };
